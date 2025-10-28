@@ -14,5 +14,5 @@ module-root = "src"
 module-name = "cloud_storage"
 
 [build-system]
-requires = ["uv_build>=0.8.20,<0.9.0"]
+requires = ["uv_build>=0.8.20,<0.10.0"]
 build-backend = "uv_build"
