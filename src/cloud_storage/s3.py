@@ -58,8 +58,15 @@ class AsyncS3Storage(AsyncBaseStorage):
 
     @override
     def get_secure_key(self, key: str) -> str:
-        filename = secure_filename(Path(key).name)
-        return str(Path(key).with_name(filename))
+        parts = Path(key).parts
+        safe_parts: list[str] = []
+
+        for part in parts:
+            if part not in ("..", ".", ""):
+                safe_parts.append(secure_filename(part))
+
+        safe_path = Path(*safe_parts)
+        return str(safe_path)
 
     @override
     async def get_size(self, key: str) -> int:
@@ -70,7 +77,10 @@ class AsyncS3Storage(AsyncBaseStorage):
                 response = await s3_client.head_object(Bucket=self.bucket_name, Key=key)
                 return int(response.get("ContentLength", 0))
             except ClientError as e:
-                if e.response.get("Error", {}).get("Code") == "NoSuchKey":
+                code = e.response.get("Error", {}).get("Code")
+                status = e.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+
+                if code in ("NoSuchKey", "NotFound") or status == 404:
                     return 0
                 raise
 
