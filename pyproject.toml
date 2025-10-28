@@ -6,12 +6,33 @@ readme = "README.md"
 authors = [
     { name = "stabldev", email = "thestabldev@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = []
+
+[project.optional-dependencies]
+s3 = ["aioboto3>=15.4.0"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-aioboto3>=0.6.0",
+    "pytest-asyncio>=1.2.0",
+]
 
 [tool.uv.build-backend]
 module-root = "src"
 module-name = "cloud_storage"
+
+[tool.pyright]
+reportMissingTypeStubs = "none"
+reportUnknownMemberType = "none"
+reportUnusedCallResult = "none"
+reportUnknownVariableType = "none"
+reportAny = "none"
+reportExplicitAny = "none"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["uv_build>=0.8.20,<0.10.0"]
