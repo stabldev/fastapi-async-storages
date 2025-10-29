@@ -8,7 +8,6 @@ from cloud_storage import AsyncS3Storage
 @pytest.mark.asyncio
 async def test_s3_storage_methods(s3_test_env: Any):
     bucket_name, endpoint_without_scheme = s3_test_env
-
     storage = AsyncS3Storage(
         bucket_name=bucket_name,
         endpoint_url=endpoint_without_scheme,
@@ -17,28 +16,27 @@ async def test_s3_storage_methods(s3_test_env: Any):
         use_ssl=False,
     )
 
+    file_name = "test/file.txt"
     file_content = b"hello moto"
     file_obj = BytesIO(file_content)
 
-    name = "test/file.txt"
-
     # upload test
-    returned_name = await storage.upload(file_obj, name)
-    assert returned_name == storage.get_name(name)
+    returned_name = await storage.upload(file_obj, file_name)
+    assert returned_name == storage.get_name(file_name)
 
     # get url test without custom domain or querystring_auth
-    url = await storage.get_url(name)
-    assert name in url
+    url = await storage.get_url(file_name)
+    assert file_name in url
 
     # get size test
-    size = await storage.get_size(name)
+    size = await storage.get_size(file_name)
     assert size == len(file_content)
 
     # delete test (should suceed silently)
-    await storage.delete(name)
+    await storage.delete(file_name)
 
     # get size test after delete (should return 0)
-    size_after_delete = await storage.get_size(name)
+    size_after_delete = await storage.get_size(file_name)
     assert size_after_delete == 0
 
 
