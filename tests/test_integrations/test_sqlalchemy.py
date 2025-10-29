@@ -108,7 +108,7 @@ async def test_sqlalchemy_filetype_none_and_plain_string_with_s3(s3_test_storage
         doc_none = await session.get(Document, id_none)
         doc_plain = await session.get(Document, id_plain)
 
-        # None should stay None (no AsyncStorageFile instance)
+        # None should stay None (no StorageFile instance)
         assert doc_none.file is None
 
         # check instance type

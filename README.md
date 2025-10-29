@@ -16,9 +16,9 @@ uv add "fastapi-cloud-storage[s3]"
 1. **Define your async S3 storage**
 
 ```py
-from async_storages import AsyncS3Storage
+from async_storages import S3Storage
 
-storage = AsyncS3Storage(
+storage = S3Storage(
     bucket_name="your-bucket",
     endpoint_url="s3.your-cloud.com",
     aws_access_key_id="KEY",
@@ -28,11 +28,11 @@ storage = AsyncS3Storage(
 ```
 
 2. **Define your SQLAlchemy/SQLModel model**\
-   Use the provided `AsyncFileType` as the column type:
+   Use the provided `FileType` as the column type:
 
 ```py
 from sqlalchemy import Column, Integer
-from async_storages.integrations.sqlalchemy import AsyncFileType
+from async_storages.integrations.sqlalchemy import FileType
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -40,7 +40,7 @@ Base = declarative_base()
 class Document(Base):
     __tablename__ = "documents"
     id = Column(Integer, primary_key=True)
-    file = Column(AsyncFileType(storage=storage))
+    file = Column(FileType(storage=storage))
 ```
 
 3. **Upload files asynchronously before DB commit**\
@@ -57,14 +57,14 @@ await session.commit()
 
 # fetch from DB
 doc = await session.get(Document, doc.id)
-assert isinstance(doc.file, AsyncStorageFile)
+assert isinstance(doc.file, StorageFile)
 
 url = await doc.file.get_url()
 await doc.file.delete()
 ```
 
 4. **Access files asynchronously**\
-   When fetching from `DB`, file attribute is an `AsyncStorageFile` with async methods:
+   When fetching from `DB`, file attribute is an `StorageFile` with async methods:
 
 ```py
 doc = await session.get(Document, some_id)
@@ -79,10 +79,10 @@ await doc.file.delete()  # delete current file
 
 ```py
 from fastapi import FastAPI, UploadFile
-from async_storages import AsyncS3Storage
+from async_storages import S3Storage
 
 app = FastAPI(...)
-storage = AsyncS3Storage(...)
+storage = S3Storage(...)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile):
