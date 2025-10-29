@@ -16,6 +16,33 @@ except ImportError:
 
 
 class S3Storage(BaseStorage):
+    """
+    Asynchronous storage backend for Amazon S3-compatible object storage.
+
+    This class provides async methods for uploading, retrieving, and deleting files
+    in an S3 bucket using the ``aioboto3`` client.
+
+    :param bucket_name: Name of the S3 bucket.
+    :type bucket_name: str
+    :param endpoint_url: The S3 endpoint hostname (without protocol).
+    :type endpoint_url: str
+    :param aws_access_key_id: AWS access key ID for authentication.
+    :type aws_access_key_id: str
+    :param aws_secret_access_key: AWS secret access key for authentication.
+    :type aws_secret_access_key: str
+    :param region_name: AWS region name (optional).
+    :type region_name: str or None
+    :param use_ssl: Whether to use HTTPS (True) or HTTP (False).
+    :type use_ssl: bool
+    :param default_acl: Default Access Control List (ACL) to apply when uploading files.
+    :type default_acl: str or None
+    :param custom_domain: Custom domain for serving files (e.g. CDN).
+    :type custom_domain: str or None
+    :param querystring_auth: Whether to generate presigned URLs with query parameters.
+    :type querystring_auth: bool
+    :raises ImportError: If ``aioboto3`` is not installed.
+    """
+
     def __init__(
         self,
         bucket_name: str,
@@ -47,6 +74,12 @@ class S3Storage(BaseStorage):
         self._session: "aioboto3.Session" = aioboto3.Session()
 
     def _get_s3_client(self) -> Any:
+        """
+        Create a new asynchronous S3 client session.
+
+        :return: A configured ``aioboto3`` S3 client instance.
+        :rtype: aioboto3.client
+        """
         return self._session.client(
             "s3",
             region_name=self.region_name,
@@ -58,6 +91,17 @@ class S3Storage(BaseStorage):
 
     @override
     def get_name(self, name: str) -> str:
+        """
+        Sanitize and normalize a file path before uploading to S3.
+
+        Removes unsafe path components (``..`` or ``.``) and ensures each
+        segment is a secure filename.
+
+        :param name: Original file name or path.
+        :type name: str
+        :return: Sanitized file path.
+        :rtype: str
+        """
         parts = Path(name).parts
         safe_parts: list[str] = []
 
@@ -70,6 +114,15 @@ class S3Storage(BaseStorage):
 
     @override
     async def get_size(self, name: str) -> int:
+        """
+        Retrieve the size of an S3 object in bytes.
+
+        :param name: The object key (path) in the S3 bucket.
+        :type name: str
+        :return: The file size in bytes, or ``0`` if the object does not exist.
+        :rtype: int
+        :raises botocore.exceptions.ClientError: If an unexpected S3 error occurs.
+        """
         name = self.get_name(name)
 
         async with self._get_s3_client() as s3_client:
@@ -86,6 +139,17 @@ class S3Storage(BaseStorage):
 
     @override
     async def get_url(self, name: str) -> str:
+        """
+        Generate a URL for accessing an S3 object.
+
+        If ``custom_domain`` is set, returns a static URL using that domain.
+        If ``querystring_auth`` is True, returns a presigned URL with temporary access.
+
+        :param name: The object key (path) in the S3 bucket.
+        :type name: str
+        :return: A direct or presigned URL for the file.
+        :rtype: str
+        """
         if self.custom_domain:
             return f"{self._http_scheme}://{self.custom_domain}/{name}"
         elif self.querystring_auth:
@@ -100,6 +164,17 @@ class S3Storage(BaseStorage):
 
     @override
     async def upload(self, file: BinaryIO, name: str) -> str:
+        """
+        Upload a file object to the configured S3 bucket.
+
+        :param file: Binary file-like object to upload.
+        :type file: BinaryIO
+        :param name: Target object key (path) in the S3 bucket.
+        :type name: str
+        :return: The name or key of the uploaded object.
+        :rtype: str
+        :raises botocore.exceptions.ClientError: If the upload fails.
+        """
         name = self.get_name(name)
         content_type, _ = mimetypes.guess_type(name)
         extra_args = {"ContentType": content_type or "application/octet-stream"}
@@ -115,6 +190,15 @@ class S3Storage(BaseStorage):
 
     @override
     async def delete(self, name: str) -> None:
+        """
+        Delete an object from the S3 bucket.
+
+        :param name: The object key (path) to delete.
+        :type name: str
+        :return: None
+        :rtype: None
+        :raises botocore.exceptions.ClientError: If the delete operation fails.
+        """
         async with self._get_s3_client() as s3_client:
             try:
                 await s3_client.delete_object(Bucket=self.bucket_name, Key=name)
