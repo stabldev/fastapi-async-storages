@@ -1,5 +1,8 @@
 # pyright: reportUnusedParameter=none
 from abc import ABC, abstractmethod
+import asyncio
+from io import BytesIO
+from PIL import Image
 from typing import BinaryIO
 
 
@@ -48,6 +51,18 @@ class BaseStorage(ABC):
         pass
 
     @abstractmethod
+    async def open(self, name: str) -> BytesIO:
+        """
+        Open an object and return it as an in-memory binary stream.
+
+        :param name: Original file name or identifier.
+        :type name: str
+        :return: A BytesIO object containing the file's contents.
+        :rtype: BytesIO
+        """
+        pass
+
+    @abstractmethod
     async def upload(self, file: BinaryIO, name: str) -> str:
         """
         Upload a file to the storage backend.
@@ -84,7 +99,7 @@ class StorageFile:
     :type storage: BaseStorage
     """
 
-    def __init__(self, name: str, storage: BaseStorage):
+    def __init__(self, name: str, storage: BaseStorage) -> None:
         self._name: str = name
         self._storage: BaseStorage = storage
 
@@ -146,33 +161,42 @@ class StorageImage(StorageFile):
     :type name: str
     :param storage: The storage backend handling file operations.
     :type storage: BaseStorage
-    :param width: The width of the image in pixels.
-    :type width: int
-    :param height: The height of the image in pixels.
+    :param width: The width of the image in pixels. Defaults to ``0`` if unknown.
+    :type width: int, optional
+    :param height: The height of the image in pixels. Defaults to ``0`` if unknown.
     :type height: int
     """
 
-    def __init__(self, name: str, storage: BaseStorage, width: int, height: int):
+    def __init__(
+        self, name: str, storage: BaseStorage, width: int = 0, height: int = 0
+    ) -> None:
         super().__init__(name, storage)
         self._width: int = width
         self._height: int = height
+        self._meta_loaded: bool = bool(width and height)
 
-    @property
-    def width(self) -> int:
-        """
-        Get the width of the image in pixels.
+    async def _load_meta(self) -> None:
+        data = await self._storage.open(self.name)
 
-        :return: The image width in pixels.
-        :rtype: int
-        """
-        return self._width
+        def _extract_meta() -> tuple[int, int]:
+            with Image.open(data) as image:
+                return image.size
 
-    @property
-    def height(self) -> int:
-        """
-        Get the height of the image in pixels.
+        self._width, self._height = await asyncio.to_thread(_extract_meta)
+        self._meta_loaded = True
 
-        :return: The image height in pixels.
-        :rtype: int
+    async def get_dimensions(self) -> tuple[int, int]:
         """
-        return self._height
+        Retrieve the dimensions of the image (width and height).
+
+        If the image metadata has not been loaded yet, this method asynchronously
+        loads it from the storage backend before returning the values.
+
+        :return: A tuple containing the image width and height in pixels.
+        :rtype: tuple[int, int]
+        :raises OSError: If the image file cannot be opened or read from storage.
+        :raises ValueError: If the image file is not a valid image or dimensions cannot be determined.
+        """
+        if not self._meta_loaded:
+            await self._load_meta()
+        return self._width, self._height

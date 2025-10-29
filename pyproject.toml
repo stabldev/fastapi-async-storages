@@ -15,6 +15,7 @@ s3 = ["aioboto3>=15.4.0"]
 [dependency-groups]
 dev = [
     "aiosqlite>=0.21.0",
+    "pillow>=12.0.0",
     "pytest>=8.4.2",
     "pytest-aioboto3>=0.6.0",
     "pytest-asyncio>=1.2.0",

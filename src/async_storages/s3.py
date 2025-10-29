@@ -1,4 +1,5 @@
 # pyright: reportPrivateLocalImportUsage=none
+from io import BytesIO
 import mimetypes
 from pathlib import Path
 from typing import Any, BinaryIO, override
@@ -54,7 +55,7 @@ class S3Storage(BaseStorage):
         default_acl: str | None = None,
         custom_domain: str | None = None,
         querystring_auth: bool = False,
-    ):
+    ) -> None:
         assert not endpoint_url.startswith("http"), (
             "Endpoint should not contain protocol"
         )
@@ -74,12 +75,6 @@ class S3Storage(BaseStorage):
         self._session: "aioboto3.Session" = aioboto3.Session()
 
     def _get_s3_client(self) -> Any:
-        """
-        Create a new asynchronous S3 client session.
-
-        :return: A configured ``aioboto3`` S3 client instance.
-        :rtype: aioboto3.client
-        """
         return self._session.client(
             "s3",
             region_name=self.region_name,
@@ -161,6 +156,39 @@ class S3Storage(BaseStorage):
         else:
             url = f"{self._http_scheme}://{self.endpoint_url}/{self.bucket_name}/{name}"
             return url
+
+    @override
+    async def open(self, name: str) -> BytesIO:
+        """
+        Open an object from S3 and return it as an in-memory binary stream.
+
+        This method fetches the file contents asynchronously and returns
+        a ``BytesIO`` object positioned at the start of the file.
+
+        :param name: The object key (path) in the S3 bucket.
+        :type name: str
+        :return: A BytesIO object containing the file's contents.
+        :rtype: BytesIO
+        :raises FileNotFoundError: If the object is not found.
+        :raises botocore.exceptions.ClientError: If the object cannot be fetched.
+        """
+        name = self.get_name(name)
+
+        async with self._get_s3_client() as s3_client:
+            try:
+                response = await s3_client.get_object(Bucket=self.bucket_name, Key=name)
+            except ClientError as e:
+                code = e.response.get("Error", {}).get("Code")
+                if code in ("NoSuchKey", "NotFound"):
+                    raise FileNotFoundError(
+                        f"Object not found in bucket: {name}"
+                    ) from e
+                raise
+
+            async with response["Body"] as stream:
+                data = await stream.read()
+
+        return BytesIO(data)
 
     @override
     async def upload(self, file: BinaryIO, name: str) -> str:
