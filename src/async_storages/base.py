@@ -1,8 +1,9 @@
 # pyright: reportUnusedParameter=none
+from abc import ABC, abstractmethod
 from typing import BinaryIO
 
 
-class BaseStorage:
+class BaseStorage(ABC):
     """
     Abstract base class defining the interface for storage backends.
 
@@ -10,6 +11,7 @@ class BaseStorage:
     such as file upload, deletion, and retrieval of metadata or URLs.
     """
 
+    @abstractmethod
     def get_name(self, name: str) -> str:
         """
         Get the name of the file.
@@ -18,10 +20,10 @@ class BaseStorage:
         :type name: str
         :return: The name of the file in storage.
         :rtype: str
-        :raises NotImplementedError: Must be implemented by subclasses.
         """
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     async def get_size(self, name: str) -> int:
         """
         Get the size of the file in bytes.
@@ -30,10 +32,10 @@ class BaseStorage:
         :type name: str
         :return: The file size in bytes.
         :rtype: int
-        :raises NotImplementedError: Must be implemented by subclasses.
         """
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     async def get_url(self, name: str) -> str:
         """
         Get a URL or path to access the file.
@@ -42,10 +44,10 @@ class BaseStorage:
         :type name: str
         :return: A URL or file path string.
         :rtype: str
-        :raises NotImplementedError: Must be implemented by subclasses.
         """
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     async def upload(self, file: BinaryIO, name: str) -> str:
         """
         Upload a file to the storage backend.
@@ -56,10 +58,10 @@ class BaseStorage:
         :type name: str
         :return: The name or path of the uploaded file.
         :rtype: str
-        :raises NotImplementedError: Must be implemented by subclasses.
         """
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     async def delete(self, name: str) -> None:
         """
         Delete the file from the storage backend.
@@ -68,9 +70,8 @@ class BaseStorage:
         :type name: str
         :return: None
         :rtype: None
-        :raises NotImplementedError: Must be implemented by subclasses.
         """
-        raise NotImplementedError()
+        pass
 
 
 class StorageFile:
