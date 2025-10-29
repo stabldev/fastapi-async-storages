@@ -60,14 +60,14 @@ class FileType(TypeDecorator[Any]):
         Process the database value after fetching from the database.
 
         Converts a stored file name string into a
-        :class:`~async_storages.base.StorageFile` instance
+        :class:`~async_storages.StorageFile` instance
         associated with the configured storage backend.
 
         :param value: The raw value retrieved from the database.
         :type value: Any or None
         :param dialect: The SQLAlchemy database dialect in use.
         :type dialect: Dialect
-        :return: A :class:`~async_storages.base.StorageFile` instance, or ``None``.
+        :return: A :class:`~async_storages.StorageFile` instance, or ``None``.
         :rtype: StorageFile or None
         """
         if value is None:
