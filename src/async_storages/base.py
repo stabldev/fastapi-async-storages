@@ -164,7 +164,7 @@ class StorageImage(StorageFile):
     :param width: The width of the image in pixels. Defaults to ``0`` if unknown.
     :type width: int, optional
     :param height: The height of the image in pixels. Defaults to ``0`` if unknown.
-    :type height: int
+    :type height: int, optional
     """
 
     def __init__(
