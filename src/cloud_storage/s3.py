@@ -57,8 +57,8 @@ class AsyncS3Storage(AsyncBaseStorage):
         )
 
     @override
-    def get_secure_key(self, key: str) -> str:
-        parts = Path(key).parts
+    def get_name(self, name: str) -> str:
+        parts = Path(name).parts
         safe_parts: list[str] = []
 
         for part in parts:
@@ -69,13 +69,13 @@ class AsyncS3Storage(AsyncBaseStorage):
         return str(safe_path)
 
     @override
-    async def get_size(self, key: str) -> int:
-        key = self.get_secure_key(key)
+    async def get_size(self, name: str) -> int:
+        name = self.get_name(name)
 
         async with self._get_s3_client() as s3_client:
             try:
-                response = await s3_client.head_object(Bucket=self.bucket_name, Key=key)
-                return int(response.get("ContentLength", 0))
+                res = await s3_client.head_object(Bucket=self.bucket_name, Key=name)
+                return int(res.get("ContentLength", 0))
             except ClientError as e:
                 code = e.response.get("Error", {}).get("Code")
                 status = e.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
@@ -85,23 +85,23 @@ class AsyncS3Storage(AsyncBaseStorage):
                 raise
 
     @override
-    async def get_url(self, key: str, expires_in: int = 3600) -> str:
+    async def get_url(self, name: str) -> str:
         if self.custom_domain:
-            return f"{self._http_scheme}://{self.custom_domain}/{key}"
+            return f"{self._http_scheme}://{self.custom_domain}/{name}"
         elif self.querystring_auth:
             async with self._get_s3_client() as s3_client:
-                params = {"Bucket": self.bucket_name, "Key": key}
+                params = {"Bucket": self.bucket_name, "Key": name}
                 return await s3_client.generate_presigned_url(
-                    "get_object", Params=params, ExpiresIn=expires_in
+                    "get_object", Params=params
                 )
         else:
-            url = f"{self._http_scheme}://{self.endpoint_url}/{self.bucket_name}/{key}"
+            url = f"{self._http_scheme}://{self.endpoint_url}/{self.bucket_name}/{name}"
             return url
 
     @override
-    async def upload(self, file: BinaryIO, key: str) -> str:
-        key = self.get_secure_key(key)
-        content_type, _ = mimetypes.guess_type(key)
+    async def upload(self, file: BinaryIO, name: str) -> str:
+        name = self.get_name(name)
+        content_type, _ = mimetypes.guess_type(name)
         extra_args = {"ContentType": content_type or "application/octet-stream"}
         if self.default_acl:
             extra_args["ACL"] = self.default_acl
@@ -109,15 +109,15 @@ class AsyncS3Storage(AsyncBaseStorage):
         async with self._get_s3_client() as s3_client:
             file.seek(0)
             await s3_client.put_object(
-                Bucket=self.bucket_name, Key=key, Body=file, **extra_args
+                Bucket=self.bucket_name, Key=name, Body=file, **extra_args
             )
-        return key
+        return name
 
     @override
-    async def delete(self, key: str) -> None:
+    async def delete(self, name: str) -> None:
         async with self._get_s3_client() as s3_client:
             try:
-                await s3_client.delete_object(Bucket=self.bucket_name, Key=key)
+                await s3_client.delete_object(Bucket=self.bucket_name, Key=name)
             except ClientError as e:
                 if e.response.get("Error", {}).get("Code") != "NoSuchKey":
                     raise

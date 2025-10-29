@@ -17,6 +17,7 @@ dev = [
     "pytest>=8.4.2",
     "pytest-aioboto3>=0.6.0",
     "pytest-asyncio>=1.2.0",
+    "sqlalchemy>=2.0.44",
 ]
 
 [tool.uv.build-backend]

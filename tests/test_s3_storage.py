@@ -20,25 +20,25 @@ async def test_s3_storage_methods(s3_test_env: Any):
     file_content = b"hello moto"
     file_obj = BytesIO(file_content)
 
-    key = "test/file.txt"
+    name = "test/file.txt"
 
     # upload test
-    returned_key = await storage.upload(file_obj, key)
-    assert returned_key == storage.get_secure_key(key)
+    returned_name = await storage.upload(file_obj, name)
+    assert returned_name == storage.get_name(name)
 
     # get url test without custom domain or querystring_auth
-    url = await storage.get_url(key)
-    assert key in url
+    url = await storage.get_url(name)
+    assert name in url
 
     # get size test
-    size = await storage.get_size(key)
+    size = await storage.get_size(name)
     assert size == len(file_content)
 
     # delete test (should suceed silently)
-    await storage.delete(key)
+    await storage.delete(name)
 
     # get size test after delete (should return 0)
-    size_after_delete = await storage.get_size(key)
+    size_after_delete = await storage.get_size(name)
     assert size_after_delete == 0
 
 
@@ -55,8 +55,8 @@ async def test_s3_storage_querystring_auth(s3_test_env: Any):
         querystring_auth=True,
     )
 
-    key = "test/file.txt"
-    url = await storage.get_url(key)
+    name = "test/file.txt"
+    url = await storage.get_url(name)
 
     assert url.count("AWSAccessKeyId=") == 1
     assert url.count("Signature=") == 1
@@ -76,11 +76,11 @@ async def test_s3_storage_custom_domain(s3_test_env: Any):
         custom_domain="cdn.example.com",
     )
 
-    key = "test/file.txt"
-    url = await storage.get_url(key)
+    name = "test/file.txt"
+    url = await storage.get_url(name)
 
     assert url.startswith("http://cdn.example.com/")
-    assert key in await storage.get_url(key)
+    assert name in await storage.get_url(name)
 
 
 @pytest.mark.asyncio
@@ -93,8 +93,8 @@ async def test_get_secure_key_normalization():
         use_ssl=False,
     )
 
-    raw_key = "../../weird ../file name.txt"
-    normalized_key = storage.get_secure_key(raw_key)
+    raw_name = "../../weird ../file name.txt"
+    normalized_name = storage.get_name(raw_name)
 
-    assert ".." not in normalized_key
-    assert ".txt" in normalized_key
+    assert ".." not in normalized_name
+    assert ".txt" in normalized_name
