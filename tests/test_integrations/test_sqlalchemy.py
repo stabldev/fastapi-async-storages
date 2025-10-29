@@ -1,3 +1,4 @@
+# pyright: reportOptionalMemberAccess=none
 from io import BytesIO
 from typing import Any
 import pytest
@@ -19,7 +20,7 @@ class Document(Base):
 
 
 @pytest.mark.asyncio
-async def test_sqlalchemy_filetype_with_s3(s3_test_storage: Any):
+async def test_sqlalchemy_with_s3(s3_test_storage: Any):
     storage = s3_test_storage
     # assign s3_storage to file column
     Document.__table__.columns.file.type.storage = storage
@@ -52,8 +53,6 @@ async def test_sqlalchemy_filetype_with_s3(s3_test_storage: Any):
     # fetch record back and run tests
     async with async_session() as session:
         doc = await session.get(Document, doc_id)
-        if doc is None:
-            return
 
         # check instance type
         assert isinstance(doc.file, AsyncStorageFile)
@@ -70,6 +69,55 @@ async def test_sqlalchemy_filetype_with_s3(s3_test_storage: Any):
         await doc.file.delete()
         size_after_delete = await storage.get_size(file_name)
         assert size_after_delete == 0
+
+    # close all connections
+    await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_sqlalchemy_filetype_none_and_plain_string_with_s3(s3_test_storage: Any):
+    storage = s3_test_storage
+    # assign s3_storage to file column
+    Document.__table__.columns.file.type.storage = storage
+
+    # create async engine and session
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
+    async_session = async_sessionmaker(
+        engine, expire_on_commit=False, class_=AsyncSession
+    )
+
+    # create db tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # insert test records into db
+    async with async_session() as session:
+        # case 1: None value
+        doc_none = Document(file=None)
+        session.add(doc_none)
+
+        # case 2: plain string value (simulate manually setting filename)
+        doc_plain = Document(file="plain/path/file.txt")
+        session.add(doc_plain)
+
+        await session.commit()
+        id_none, id_plain = doc_none.id, doc_plain.id
+
+    # fetch records back and run tests
+    async with async_session() as session:
+        doc_none = await session.get(Document, id_none)
+        doc_plain = await session.get(Document, id_plain)
+
+        # None should stay None (no AsyncStorageFile instance)
+        assert doc_none.file is None
+
+        # check instance type
+        assert isinstance(doc_plain.file, AsyncStorageFile)
+        assert doc_plain.file.name == "plain/path/file.txt"
+
+        # methods should work
+        url = await doc_plain.file.get_url()
+        assert "plain/path/file.txt" in url
 
     # close all connections
     await engine.dispose()
