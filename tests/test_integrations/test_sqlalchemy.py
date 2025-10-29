@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.asyncio.session import async_sessionmaker
 from sqlalchemy.orm import declarative_base
 
-from cloud_storage import AsyncStorageFile
-from cloud_storage.integrations.sqlalchemy import AsyncFileType
+from async_storages import StorageFile
+from async_storages.integrations.sqlalchemy import FileType
 
 Base = declarative_base()
 
@@ -16,7 +16,7 @@ Base = declarative_base()
 class Document(Base):
     __tablename__: str = "documents"
     id: Column[int] = Column(Integer, primary_key=True)
-    file: Column[str] = Column(AsyncFileType(storage=None))  # pyright: ignore[reportArgumentType]
+    file: Column[str] = Column(FileType(storage=None))  # pyright: ignore[reportArgumentType]
 
 
 @pytest.mark.asyncio
@@ -55,7 +55,7 @@ async def test_sqlalchemy_with_s3(s3_test_storage: Any):
         doc = await session.get(Document, doc_id)
 
         # check instance type
-        assert isinstance(doc.file, AsyncStorageFile)
+        assert isinstance(doc.file, StorageFile)
         assert doc.file.name == f"{file_name}"
 
         # methods should work
@@ -108,11 +108,11 @@ async def test_sqlalchemy_filetype_none_and_plain_string_with_s3(s3_test_storage
         doc_none = await session.get(Document, id_none)
         doc_plain = await session.get(Document, id_plain)
 
-        # None should stay None (no AsyncStorageFile instance)
+        # None should stay None (no StorageFile instance)
         assert doc_none.file is None
 
         # check instance type
-        assert isinstance(doc_plain.file, AsyncStorageFile)
+        assert isinstance(doc_plain.file, StorageFile)
         assert doc_plain.file.name == "plain/path/file.txt"
 
         # methods should work

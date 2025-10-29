@@ -3,19 +3,19 @@ import mimetypes
 from pathlib import Path
 from typing import Any, BinaryIO, override
 
-from cloud_storage.base import AsyncBaseStorage
-from cloud_storage.utils import secure_filename
+from async_storages.base import BaseStorage
+from async_storages.utils import secure_filename
 
 try:
     import aioboto3
     from botocore.exceptions import ClientError
 except ImportError:
     raise ImportError(
-        "'aioboto3' is not installed. Install with 'fastapi-cloud-storage[s3]'."
+        "'aioboto3' is not installed. Install with 'fastapi-async-storages[s3]'."
     )
 
 
-class AsyncS3Storage(AsyncBaseStorage):
+class S3Storage(BaseStorage):
     def __init__(
         self,
         bucket_name: str,

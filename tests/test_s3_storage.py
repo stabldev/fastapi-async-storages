@@ -2,13 +2,13 @@ from io import BytesIO
 from typing import Any
 import pytest
 
-from cloud_storage import AsyncS3Storage
+from async_storages import S3Storage
 
 
 @pytest.mark.asyncio
 async def test_s3_storage_methods(s3_test_env: Any):
     bucket_name, endpoint_without_scheme = s3_test_env
-    storage = AsyncS3Storage(
+    storage = S3Storage(
         bucket_name=bucket_name,
         endpoint_url=endpoint_without_scheme,
         aws_access_key_id="fake-access-key",
@@ -44,7 +44,7 @@ async def test_s3_storage_methods(s3_test_env: Any):
 async def test_s3_storage_querystring_auth(s3_test_env: Any):
     bucket_name, endpoint_without_scheme = s3_test_env
 
-    storage = AsyncS3Storage(
+    storage = S3Storage(
         bucket_name=bucket_name,
         endpoint_url=endpoint_without_scheme,
         aws_access_key_id="fake-access-key",
@@ -65,7 +65,7 @@ async def test_s3_storage_querystring_auth(s3_test_env: Any):
 async def test_s3_storage_custom_domain(s3_test_env: Any):
     bucket_name, endpoint_without_scheme = s3_test_env
 
-    storage = AsyncS3Storage(
+    storage = S3Storage(
         bucket_name=bucket_name,
         endpoint_url=endpoint_without_scheme,
         aws_access_key_id="fake-access-key",
@@ -83,7 +83,7 @@ async def test_s3_storage_custom_domain(s3_test_env: Any):
 
 @pytest.mark.asyncio
 async def test_get_secure_key_normalization():
-    storage = AsyncS3Storage(
+    storage = S3Storage(
         bucket_name="fake-bucket",
         endpoint_url="fake-endpoint-url",
         aws_access_key_id="fake-access-key",

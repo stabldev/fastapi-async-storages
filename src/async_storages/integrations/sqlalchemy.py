@@ -2,16 +2,16 @@ from typing import Any, override
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.types import TypeDecorator, TypeEngine, Unicode
 
-from cloud_storage.base import AsyncBaseStorage, AsyncStorageFile
+from async_storages.base import BaseStorage, StorageFile
 
 
-class AsyncFileType(TypeDecorator[Any]):
+class FileType(TypeDecorator[Any]):
     impl: TypeEngine[Any] | type[TypeEngine[Any]] = Unicode
     cache_ok: bool | None = True
 
-    def __init__(self, storage: AsyncBaseStorage, *args: Any, **kwargs: Any):
+    def __init__(self, storage: BaseStorage, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self.storage: AsyncBaseStorage = storage
+        self.storage: BaseStorage = storage
 
     @override
     def process_bind_param(self, value: Any, dialect: Dialect) -> str:
@@ -28,7 +28,7 @@ class AsyncFileType(TypeDecorator[Any]):
     @override
     def process_result_value(
         self, value: Any | None, dialect: Dialect
-    ) -> AsyncStorageFile | None:
+    ) -> StorageFile | None:
         if value is None:
             return None
-        return AsyncStorageFile(name=value, storage=self.storage)
+        return StorageFile(name=value, storage=self.storage)
