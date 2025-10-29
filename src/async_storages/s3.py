@@ -11,7 +11,7 @@ try:
     from botocore.exceptions import ClientError
 except ImportError:
     raise ImportError(
-        "'aioboto3' is not installed. Install with 'fastapi-cloud-storage[s3]'."
+        "'aioboto3' is not installed. Install with 'fastapi-async-storages[s3]'."
     )
 
 

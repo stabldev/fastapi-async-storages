@@ -1,14 +1,14 @@
-# fastapi-cloud-storage
+# fastapi-async-storages
 
 A powerful, extensible, and async-ready cloud object storage backend for FastAPI.
 
 > Drop-in, plug-and-play cloud storage for your FastAPI apps; with full async support.\
-Inspired by [fastapi-storages](https://github.com/aminalaee/fastapi-storages), built on modern async patterns using [aioboto3](https://github.com/terricain/aioboto3).
+> Inspired by [fastapi-storages](https://github.com/aminalaee/fastapi-storages), built on modern async patterns using [aioboto3](https://github.com/terricain/aioboto3).
 
 ## Installation
 
 ```bash
-uv add "fastapi-cloud-storage[s3]"
+uv add "fastapi-async-storages[s3]"
 ```
 
 ## Quick Start
@@ -92,4 +92,4 @@ async def upload_file(file: UploadFile):
 
 ## License
 
-[MIT](LICENSE) © 2025 ^_^ [`@stabldev`](https://github.com/stabldev)
+[MIT](LICENSE) © 2025 ^\_^ [`@stabldev`](https://github.com/stabldev)
