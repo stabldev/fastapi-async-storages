@@ -16,7 +16,7 @@ uv add "fastapi-cloud-storage[s3]"
 1. **Define your async S3 storage**
 
 ```py
-from cloud_storage import AsyncS3Storage
+from async_storages import AsyncS3Storage
 
 storage = AsyncS3Storage(
     bucket_name="your-bucket",
@@ -32,7 +32,7 @@ storage = AsyncS3Storage(
 
 ```py
 from sqlalchemy import Column, Integer
-from cloud_storage.integrations.sqlalchemy import AsyncFileType
+from async_storages.integrations.sqlalchemy import AsyncFileType
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -79,7 +79,7 @@ await doc.file.delete()  # delete current file
 
 ```py
 from fastapi import FastAPI, UploadFile
-from cloud_storage import AsyncS3Storage
+from async_storages import AsyncS3Storage
 
 app = FastAPI(...)
 storage = AsyncS3Storage(...)

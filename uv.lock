@@ -512,7 +512,7 @@ wheels = [
 ]
 
 [[package]]
-name = "fastapi-cloud-storage"
+name = "fastapi-async-storages"
 version = "0.1.0"
 source = { editable = "." }
 

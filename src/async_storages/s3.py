@@ -3,8 +3,8 @@ import mimetypes
 from pathlib import Path
 from typing import Any, BinaryIO, override
 
-from cloud_storage.base import AsyncBaseStorage
-from cloud_storage.utils import secure_filename
+from async_storages.base import BaseStorage
+from async_storages.utils import secure_filename
 
 try:
     import aioboto3
@@ -15,7 +15,7 @@ except ImportError:
     )
 
 
-class AsyncS3Storage(AsyncBaseStorage):
+class S3Storage(BaseStorage):
     def __init__(
         self,
         bucket_name: str,

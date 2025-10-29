@@ -2,7 +2,7 @@
 from typing import BinaryIO
 
 
-class AsyncBaseStorage:
+class BaseStorage:
     def get_name(self, name: str) -> str:
         raise NotImplementedError()
 
@@ -19,10 +19,10 @@ class AsyncBaseStorage:
         raise NotImplementedError()
 
 
-class AsyncStorageFile:
-    def __init__(self, name: str, storage: AsyncBaseStorage):
+class StorageFile:
+    def __init__(self, name: str, storage: BaseStorage):
         self._name: str = name
-        self._storage: AsyncBaseStorage = storage
+        self._storage: BaseStorage = storage
 
     @property
     def name(self) -> str:

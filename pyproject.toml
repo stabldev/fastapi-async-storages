@@ -1,5 +1,5 @@
 [project]
-name = "fastapi-cloud-storage"
+name = "fastapi-async-storages"
 version = "0.1.0"
 description = "A powerful, extensible, and async-ready cloud object storage backend for FastAPI."
 readme = "README.md"
@@ -23,7 +23,7 @@ dev = [
 
 [tool.uv.build-backend]
 module-root = "src"
-module-name = "cloud_storage"
+module-name = "async_storages"
 
 [tool.pyright]
 reportMissingTypeStubs = "none"
