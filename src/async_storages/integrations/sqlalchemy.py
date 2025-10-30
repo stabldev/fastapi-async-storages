@@ -2,7 +2,8 @@ from typing import Any, override
 from sqlalchemy.engine.interfaces import Dialect
 from sqlalchemy.types import TypeDecorator, TypeEngine, Unicode
 
-from async_storages.base import BaseStorage, StorageFile
+from async_storages import StorageFile, StorageImage
+from async_storages.base import BaseStorage
 
 
 class FileType(TypeDecorator[Any]):
@@ -73,3 +74,44 @@ class FileType(TypeDecorator[Any]):
         if value is None:
             return None
         return StorageFile(name=value, storage=self.storage)
+
+
+class ImageType(FileType):
+    """
+    SQLAlchemy column type for representing stored image files.
+
+    This type extends :class:`~.FileType` to automatically wrap
+    database values (image file names) into
+    :class:`~async_storages.StorageImage` objects when queried.
+
+    It integrates with a configured :class:`~async_storages.base.BaseStorage`
+    backend to provide convenient access to image operations such as
+    resizing, thumbnail generation, or metadata retrieval.
+
+    :param storage: The storage backend used to manage image file operations.
+    :type storage: BaseStorage
+    :param args: Additional positional arguments passed to ``FileType``.
+    :param kwargs: Additional keyword arguments passed to ``FileType``.
+    """
+
+    @override
+    def process_result_value(
+        self, value: Any | None, dialect: Dialect
+    ) -> StorageFile | None:
+        """
+        Process the database value after fetching from the database.
+
+        Converts a stored image file name string into a
+        :class:`~async_storages.StorageImage` instance associated with
+        the configured storage backend.
+
+        :param value: The raw value retrieved from the database.
+        :type value: Any or None
+        :param dialect: The SQLAlchemy database dialect in use.
+        :type dialect: Dialect
+        :return: A :class:`~async_storages.StorageImage` instance, or ``None``.
+        :rtype: StorageImage or None
+        """
+        if value is None:
+            return None
+        return StorageImage(name=value, storage=self.storage)
