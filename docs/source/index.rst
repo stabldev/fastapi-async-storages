@@ -8,19 +8,12 @@ A powerful, extensible, and async-ready cloud object storage backend for FastAPI
    Inspired by `fastapi-storages <https://github.com/aminalaee/fastapi-storages>`_,
    built on modern async patterns using `aioboto3 <https://github.com/terricain/aioboto3>`_.
 
-.. rubric:: Supported Storage Backends
-* :class:`~async_storages.S3Storage`
-
-.. rubric:: Table of Contents
-.. toctree::
-  :maxdepth: 1
-  :caption: USER GUIDE:
-
-  installation
-
+.. rubric:: Table of contents
 .. toctree::
   :maxdepth: 3
 
+  installation
+  usage
   api_reference
 
 .. rubric:: Example: FastAPI
