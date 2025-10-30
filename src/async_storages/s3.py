@@ -187,7 +187,6 @@ class S3Storage(BaseStorage):
 
             async with response["Body"] as stream:
                 data = await stream.read()
-
         return BytesIO(data)
 
     @override
