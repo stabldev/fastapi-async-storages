@@ -9,7 +9,12 @@ A powerful, extensible, and async-ready cloud object storage backend for FastAPI
    built on modern async patterns using `aioboto3 <https://github.com/terricain/aioboto3>`__.
 
 .. toctree::
-   :maxdepth: 3
-   :caption: USER GUIDE:
+  :maxdepth: 1
+  :caption: USER GUIDE:
 
-   api_reference
+  installation
+
+.. toctree::
+  :maxdepth: 3
+
+  api_reference
