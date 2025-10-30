@@ -1,14 +1,15 @@
 # pyright: reportOptionalMemberAccess=none
 from io import BytesIO
 from typing import Any
+from PIL import Image
 import pytest
 from sqlalchemy import Column, Integer
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.asyncio.session import async_sessionmaker
 from sqlalchemy.orm import declarative_base
 
-from async_storages import StorageFile
-from async_storages.integrations.sqlalchemy import FileType
+from async_storages import StorageFile, StorageImage
+from async_storages.integrations.sqlalchemy import FileType, ImageType
 
 Base = declarative_base()
 
@@ -17,6 +18,7 @@ class Document(Base):
     __tablename__: str = "documents"
     id: Column[int] = Column(Integer, primary_key=True)
     file: Column[str] = Column(FileType(storage=None))  # pyright: ignore[reportArgumentType]
+    image: Column[str] = Column(ImageType(storage=None))  # pyright: ignore[reportArgumentType]
 
 
 @pytest.mark.asyncio
@@ -121,3 +123,44 @@ async def test_sqlalchemy_filetype_none_and_plain_string_with_s3(s3_test_storage
 
     # close all connections
     await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_document_with_both_filetypes(s3_test_storage: Any):
+    storage = s3_test_storage
+    # assign s3_storage to file column
+    Document.__table__.columns.image.type.storage = storage
+
+    # create async engine and session
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async_session = async_sessionmaker(
+        engine, expire_on_commit=False, class_=AsyncSession
+    )
+
+    # create db tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    # create image object in-memory
+    img_name = "uploads/test-image.png"
+    img_buf = BytesIO()
+    Image.new("RGB", (32, 16), color=(255, 0, 0)).save(img_buf, format="PNG")
+    img_buf.seek(0)
+    await storage.upload(img_buf, img_name)
+
+    # insert test records into db
+    async with async_session() as session:
+        doc = Document(image=img_name)
+        session.add(doc)
+        await session.commit()
+        doc_id = doc.id
+
+    # fetch records back and run tests
+    async with async_session() as session:
+        doc = await session.get(Document, doc_id)
+        # check instance type
+        assert isinstance(doc.image, StorageImage)
+
+        # methods should work
+        width, height = await doc.image.get_dimensions()
+        assert width == 32 and height == 16
