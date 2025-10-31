@@ -21,6 +21,10 @@ dev = [
     "pytest-asyncio>=1.2.0",
     "sqlalchemy>=2.0.44",
 ]
+docs = [
+    "furo>=2025.9.25",
+    "sphinx>=8.2.3",
+]
 
 [tool.uv.build-backend]
 module-root = "src"
