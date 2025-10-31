@@ -13,7 +13,7 @@ While `fastapi-storages <https://github.com/aminalaee/fastapi-storages>`_ is syn
 This allows your FastAPI app to handle more concurrent requests efficiently, especially during file upload or download operations.
 
 Why upload files before commit?
--------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 `SQLAlchemy <https://sqlalchemy.org>`_’s ORM is primarily synchronous, even when used with `AsyncSession <https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html>`_.
 The model layer and column bindings (including file fields) are not async-aware.
 Therefore, storage operations like uploading or deleting files must happen **before** the database commit.
@@ -24,7 +24,7 @@ Yes. The `SQLModel <https://sqlmodel.tiangolo.com/>`_ integration layer internal
 You can define :class:`~async_storages.integrations.sqlalchemy.FileType` columns exactly as you would in SQLAlchemy models, following the same upload-before-commit pattern.
 
 Can I use it in synchronous contexts?
--------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can, but it’s not recommended. The library is designed around `asyncio <https://docs.python.org/3/library/asyncio.html>`_ to take advantage of FastAPI’s asynchronous execution.
 If your app runs entirely synchronously, stick with `fastapi-storages <https://github.com/aminalaee/fastapi-storages>`_ for simplicity.
 
