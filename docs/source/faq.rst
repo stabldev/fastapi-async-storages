@@ -1,6 +1,9 @@
 FAQ
 ===
 
+This section answers common questions about ``fastapi-async-storages``, explaining its purpose,
+differences from similar libraries, usage considerations, and extensibility options.
+
 What is `fastapi-async-storages <https://github.com/stabldev/fastapi-async-storages>`_?
 ---------------------------------------------------------------------------------------
 `fastapi-async-storages <https://github.com/stabldev/fastapi-async-storages>`_ is the asynchronous counterpart to `fastapi-storages <https://github.com/aminalaee/fastapi-storages>`_.

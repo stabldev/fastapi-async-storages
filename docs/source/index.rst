@@ -27,7 +27,18 @@ Table of contents
   installation
   usage
   api_reference
+
+.. toctree::
+  :maxdepth: 1
+
   faq
+
+.. toctree::
+  :caption: DEVELOPMENT
+  :maxdepth: 1
+
+  roadmap
+  contributing
 
 Example: FastAPI
 ----------------

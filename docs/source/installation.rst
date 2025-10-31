@@ -1,7 +1,7 @@
 Installation
 ============
 
-This document explains how to install the **fastapi-async-storages** package.
+This document explains how to install the ``fastapi-async-storages`` package.
 Note that you can use any package manager you prefer, such as `uv`, `pip`, or others.
 
 Prerequisites

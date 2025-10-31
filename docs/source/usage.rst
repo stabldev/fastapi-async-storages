@@ -1,6 +1,9 @@
 Usage
 =====
 
+This section provides practical examples and guidance on using ``fastapi-async-storages``
+to handle asynchronous file storage in your FastAPI applications.
+
 Working with storages
 ---------------------
 
