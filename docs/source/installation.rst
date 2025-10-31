@@ -20,10 +20,15 @@ You can install the package using `uv`:
     # for s3 support:
     uv add fastapi-async-storages[s3]
 
-.. important::
+.. warning::
 
-    If you need **image support** (eg: :class:`~async_storages.StorageImage`),
-    make sure to install the `Pillow` library.
+    If you need **image support** (using :class:`~async_storages.integrations.sqlalchemy.ImageType` or :class:`~async_storages.StorageImage`),
+    make sure :code:`Pillow` library is installed.
+
+    .. code-block:: bash
+
+      uv add Pillow
+      # or uv pip install Pillow
 
 Or, to install from source:
 

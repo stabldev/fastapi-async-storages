@@ -8,15 +8,30 @@ A powerful, extensible, and async-ready cloud object storage backend for FastAPI
    Inspired by `fastapi-storages <https://github.com/aminalaee/fastapi-storages>`_,
    built on modern async patterns using `aioboto3 <https://github.com/terricain/aioboto3>`_.
 
-.. rubric:: Table of contents
+Features
+--------
+
+* Fully asynchronous storage interface designed for FastAPI applications
+* Async S3 backend powered by `aioboto3 <https://github.com/terricain/aioboto3>`_
+* `SQLAlchemy <https://sqlalchemy.org/>`_ and `SQLModel <https://sqlmodel.tiangolo.com/>`_ integration
+* Typed and extensible design
+* Supports FastAPI dependency injection
+
+Table of contents
+-----------------
+
 .. toctree::
+  :caption: USER GUIDE
   :maxdepth: 3
 
   installation
   usage
   api_reference
+  faq
 
-.. rubric:: Example: FastAPI
+Example: FastAPI
+----------------
+
 .. code-block:: python
 
   from fastapi import FastAPI, UploadFile
