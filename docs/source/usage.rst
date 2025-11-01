@@ -42,8 +42,8 @@ Now let's see a minimal example of using :class:`~async_storages.S3Storage` in a
     # upload a file
     await storage.upload(file_obj, file_name)
     # get file URL
-    url = await storage.get_url(file_name)
-    print(url)
+    path = await storage.get_path(file_name)
+    print(path)
     # get file size
     size = await storage.get_size(file_name)
     # delete file
@@ -126,7 +126,7 @@ Let's see an example:
     await session.commit()
 
     doc = await session.get(Document, doc.id)
-    url = await doc.file.get_url()
+    url = await doc.file.get_path()
     print(url)
     width, height = await doc.image.get_dimensions()
     print(f"Dimensions: {width}x{height}")

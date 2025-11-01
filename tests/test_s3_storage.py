@@ -25,8 +25,8 @@ async def test_s3_storage_methods(s3_test_env: Any):
     assert returned_name == storage.get_name(file_name)
 
     # get url test without custom domain or querystring_auth
-    url = await storage.get_url(file_name)
-    assert file_name in url
+    path = await storage.get_path(file_name)
+    assert file_name in path
 
     # get size test
     size = await storage.get_size(file_name)
@@ -54,11 +54,11 @@ async def test_s3_storage_querystring_auth(s3_test_env: Any):
     )
 
     name = "test/file.txt"
-    url = await storage.get_url(name)
+    path = await storage.get_path(name)
 
-    assert url.count("AWSAccessKeyId=") == 1
-    assert url.count("Signature=") == 1
-    assert url.count("Expires=") == 1
+    assert path.count("AWSAccessKeyId=") == 1
+    assert path.count("Signature=") == 1
+    assert path.count("Expires=") == 1
 
 
 @pytest.mark.asyncio
@@ -75,10 +75,10 @@ async def test_s3_storage_custom_domain(s3_test_env: Any):
     )
 
     name = "test/file.txt"
-    url = await storage.get_url(name)
+    path = await storage.get_path(name)
 
-    assert url.startswith("http://cdn.example.com/")
-    assert name in await storage.get_url(name)
+    assert path.startswith("http://cdn.example.com/")
+    assert name in await storage.get_path(name)
 
 
 @pytest.mark.asyncio
