@@ -1,5 +1,5 @@
 async_storages.integrations
-=========================
+===========================
 
 .. autoclass:: async_storages.integrations.sqlalchemy.FileType
     :exclude-members: cache_ok, impl, process_bind_param, process_result_value
