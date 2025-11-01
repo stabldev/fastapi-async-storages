@@ -34,6 +34,6 @@ If your app runs entirely synchronously, stick with `fastapi-storages <https://g
 Can I extend it with other storage backends?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Yes. The library’s base :class:`~async_storages.base.BaseStorage` class is extensible.
-You can implement new async backends (like local filesystem, Google Cloud Storage, or Azure Blob) by subclassing it and implementing the async methods ``upload``, ``get_url``, and ``delete``.
+You can implement new async backends (like local filesystem, Google Cloud Storage, or Azure Blob) by subclassing it and implementing the async methods ``upload``, ``get_path``, and ``delete``.
 
 `fastapi-async-storages <https://github.com/stabldev/fastapi-async-storages>`_ aims to stay compatible with existing `fastapi-storages <https://github.com/aminalaee/fastapi-storages>`_ APIs, so extension patterns remain familiar.

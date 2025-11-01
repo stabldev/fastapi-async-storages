@@ -61,8 +61,8 @@ async def test_sqlalchemy_with_s3(s3_test_storage: Any):
         assert doc.file.name == f"{file_name}"
 
         # methods should work
-        url = await doc.file.get_url()
-        assert file_name in url
+        path = await doc.file.get_path()
+        assert file_name in path
 
         size = await doc.file.get_size()
         assert size == len(file_content)
@@ -118,15 +118,15 @@ async def test_sqlalchemy_filetype_none_and_plain_string_with_s3(s3_test_storage
         assert doc_plain.file.name == "plain/path/file.txt"
 
         # methods should work
-        url = await doc_plain.file.get_url()
-        assert "plain/path/file.txt" in url
+        path = await doc_plain.file.get_path()
+        assert "plain/path/file.txt" in path
 
     # close all connections
     await engine.dispose()
 
 
 @pytest.mark.asyncio
-async def test_document_with_both_filetypes(s3_test_storage: Any):
+async def test_sqlalchemy_imagetype_with_s3(s3_test_storage: Any):
     storage = s3_test_storage
     # assign s3_storage to file column
     Document.__table__.columns.image.type.storage = storage

@@ -59,7 +59,7 @@ await session.commit()
 doc = await session.get(Document, doc.id)
 assert isinstance(doc.file, StorageFile)
 
-url = await doc.file.get_url()
+url = await doc.file.get_path()
 await doc.file.delete()
 ```
 
@@ -68,7 +68,7 @@ await doc.file.delete()
 
 ```py
 doc = await session.get(Document, some_id)
-doc_url = await doc.file.get_url()
+doc_url = await doc.file.get_path()
 doc_size = await doc.file.get_size()
 
 await doc.file.upload(another_file)  # re-upload
@@ -87,7 +87,7 @@ storage = S3Storage(...)
 @app.post("/upload")
 async def upload_file(file: UploadFile):
     name = await storage.upload(file.file, file.filename)
-    return {"url": await storage.get_url(name)}
+    return {"url": await storage.get_path(name)}
 ```
 
 ## License

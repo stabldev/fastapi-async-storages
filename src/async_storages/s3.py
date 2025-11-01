@@ -133,7 +133,7 @@ class S3Storage(BaseStorage):
                 raise
 
     @override
-    async def get_url(self, name: str) -> str:
+    async def get_path(self, name: str) -> str:
         """
         Generate a URL for accessing an S3 object.
 
