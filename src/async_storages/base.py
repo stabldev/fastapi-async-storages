@@ -7,28 +7,85 @@ from typing import BinaryIO
 
 
 class BaseStorage(ABC):
+    """
+    Abstract base class defining the interface for asynchronous file storage backends.
+
+    This class provides an asynchronous and pluggable contract for handling file
+    operations such as uploading, retrieving, and deleting files across different
+    storage systems.
+    """
+
     @abstractmethod
     def get_name(self, name: str) -> str:
+        """
+        Normalize or sanitize a given file name or path.
+
+        :param name: Original file name or path.
+        :type name: str
+        :return: A sanitized and valid file name or path for storage.
+        :rtype: str
+        """
         pass
 
     @abstractmethod
     async def get_size(self, name: str) -> int:
+        """
+        Retrieve the size of a stored file in bytes.
+
+        :param name: Original file name or path.
+        :type name: str
+        :return: File size in bytes.
+        :rtype: int
+        """
         pass
 
     @abstractmethod
     async def get_url(self, name: str) -> str:
+        """
+        Generate a URL or path to access the stored file.
+
+        :param name: Original file name or path.
+        :type name: str
+        :return: A URL or accessible path to the file.
+        :rtype: str
+        """
         pass
 
     @abstractmethod
     async def open(self, name: str) -> BytesIO:
+        """
+        Open and return a stored file as an in-memory binary stream.
+
+        :param name: Original file name or path.
+        :type name: str
+        :return: A ``BytesIO`` object containing the file's binary data.
+        :rtype: BytesIO
+        """
         pass
 
     @abstractmethod
     async def upload(self, file: BinaryIO, name: str) -> str:
+        """
+        Upload a binary file to the storage backend.
+
+        :param file: A binary file-like object to upload.
+        :type file: BinaryIO
+        :param name: Original file name or path.
+        :type name: str
+        :return: The final stored file name or path.
+        :rtype: str
+        """
         pass
 
     @abstractmethod
     async def delete(self, name: str) -> None:
+        """
+        Delete a stored file from the backend.
+
+        :param name: Original file name or path.
+        :return: None
+        :rtype: None
+        """
         pass
 
 
