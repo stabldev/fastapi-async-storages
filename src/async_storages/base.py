@@ -40,7 +40,7 @@ class BaseStorage(ABC):
         pass
 
     @abstractmethod
-    async def get_url(self, name: str) -> str:
+    async def get_path(self, name: str) -> str:
         """
         Generate a URL or path to access the stored file.
 
@@ -122,14 +122,14 @@ class StorageFile:
         """
         return await self._storage.get_size(self._name)
 
-    async def get_url(self) -> str:
+    async def get_path(self) -> str:
         """
         Get a URL or path to access the file.
 
         :return: A URL or file path string.
         :rtype: str
         """
-        return await self._storage.get_url(self._name)
+        return await self._storage.get_path(self._name)
 
     async def upload(self, file: BinaryIO) -> str:
         """
