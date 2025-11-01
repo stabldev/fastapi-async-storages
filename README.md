@@ -5,89 +5,69 @@ A powerful, extensible, and async-ready cloud object storage backend for FastAPI
 > Drop-in, plug-and-play cloud storage for your FastAPI apps; with full async support.\
 > Inspired by [fastapi-storages](https://github.com/aminalaee/fastapi-storages), built on modern async patterns using [aioboto3](https://github.com/terricain/aioboto3).
 
+## Features
+
+* Fully asynchronous storage interface designed for FastAPI applications
+* Async S3 backend powered by [aioboto3](https://github.com/terricain/aioboto3)
+* [SQLAlchemy](https://sqlalchemy.org/) and [SQLModel](https://sqlmodel.tiangolo.com/) integration
+* Typed and extensible design
+* Supports FastAPI dependency injection
+
 ## Installation
 
 ```bash
+uv add fastapi-async-storages
+# for s3 support:
 uv add "fastapi-async-storages[s3]"
 ```
 
-## Quick Start
+## Documentation
 
-1. **Define your async S3 storage**
+Full documentation is available on:\
+https://fastapi-async-storages.readthedocs.io
 
-```py
-from async_storages import S3Storage
-
-storage = S3Storage(
-    bucket_name="your-bucket",
-    endpoint_url="s3.your-cloud.com",
-    aws_access_key_id="KEY",
-    aws_secret_access_key="SECRET",
-    # ...
-)
-```
-
-2. **Define your SQLAlchemy/SQLModel model**\
-   Use the provided `FileType` as the column type:
-
-```py
-from sqlalchemy import Column, Integer
-from async_storages.integrations.sqlalchemy import FileType
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
-
-class Document(Base):
-    __tablename__ = "documents"
-    id = Column(Integer, primary_key=True)
-    file = Column(FileType(storage=storage))
-```
-
-3. **Upload files asynchronously before DB commit**\
-   Since `SQLAlchemy` binding is `synchronous`, upload files explicitly before saving:
-
-```py
-# upload the file to storage before saving record
-await storage.upload(file, file.name)
-
-# then store the file name in the DB
-doc = Document(file=file.name)
-session.add(doc)
-await session.commit()
-
-# fetch from DB
-doc = await session.get(Document, doc.id)
-assert isinstance(doc.file, StorageFile)
-
-url = await doc.file.get_path()
-await doc.file.delete()
-```
-
-4. **Access files asynchronously**\
-   When fetching from `DB`, file attribute is an `StorageFile` with async methods:
-
-```py
-doc = await session.get(Document, some_id)
-doc_url = await doc.file.get_path()
-doc_size = await doc.file.get_size()
-
-await doc.file.upload(another_file)  # re-upload
-await doc.file.delete()  # delete current file
-```
-
-## Example: FastAPI Integration
+## Example: FastAPI
 
 ```py
 from fastapi import FastAPI, UploadFile
+from sqlalchemy import Column, Integer
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, declarative_base
 from async_storages import S3Storage
+from async_storages.integrations.sqlalchemy import FileType
 
-app = FastAPI(...)
+Base = declarative_base()
+
+app = FastAPI()
 storage = S3Storage(...)
+engine = create_async_engine("sqlite+aiosqlite:///test.db", echo=True)
 
-@app.post("/upload")
-async def upload_file(file: UploadFile):
-    name = await storage.upload(file.file, file.filename)
-    return {"url": await storage.get_path(name)}
+# create AsyncSession factory
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+class Example(Base):
+    __tablename__ = "example"
+
+    id = Column(Integer, primary_key=True)
+    file = Column(FileType(storage=storage))
+
+# create tables inside an async context
+@app.on_event("startup")
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+@app.post("/upload/")
+async def create_upload_file(file: UploadFile):
+    file_name = f"uploads/{file.filename}"
+    # upload before commit due to the sqlalchemy binding being sync
+    await storage.upload(file.file, file_name)
+
+    example = Example(file=file)
+    async with AsyncSessionLocal() as session:
+        session.add(example)
+        await session.commit()
+        return {"filename": example.file.name}
 ```
 
 ## License
