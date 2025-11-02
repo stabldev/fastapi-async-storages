@@ -12,8 +12,11 @@ dependencies = []
 [project.optional-dependencies]
 s3 = ["aioboto3>=15.4.0"]
 docs = [
+    "aioboto3>=15.4.0",
     "furo>=2025.9.25",
+    "pillow>=12.0.0",
     "sphinx>=8.2.3",
+    "sqlalchemy>=2.0.44",
 ]
 
 [dependency-groups]
