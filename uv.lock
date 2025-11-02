@@ -570,8 +570,11 @@ source = { editable = "." }
 
 [package.optional-dependencies]
 docs = [
+    { name = "aioboto3" },
     { name = "furo" },
+    { name = "pillow" },
     { name = "sphinx" },
+    { name = "sqlalchemy" },
 ]
 s3 = [
     { name = "aioboto3" },
@@ -589,9 +592,12 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aioboto3", marker = "extra == 'docs'", specifier = ">=15.4.0" },
     { name = "aioboto3", marker = "extra == 's3'", specifier = ">=15.4.0" },
     { name = "furo", marker = "extra == 'docs'", specifier = ">=2025.9.25" },
+    { name = "pillow", marker = "extra == 'docs'", specifier = ">=12.0.0" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.2.3" },
+    { name = "sqlalchemy", marker = "extra == 'docs'", specifier = ">=2.0.44" },
 ]
 provides-extras = ["s3", "docs"]
 
