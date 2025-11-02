@@ -569,6 +569,10 @@ version = "0.1.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
+docs = [
+    { name = "furo" },
+    { name = "sphinx" },
+]
 s3 = [
     { name = "aioboto3" },
 ]
@@ -582,14 +586,14 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "sqlalchemy" },
 ]
-docs = [
-    { name = "furo" },
-    { name = "sphinx" },
-]
 
 [package.metadata]
-requires-dist = [{ name = "aioboto3", marker = "extra == 's3'", specifier = ">=15.4.0" }]
-provides-extras = ["s3"]
+requires-dist = [
+    { name = "aioboto3", marker = "extra == 's3'", specifier = ">=15.4.0" },
+    { name = "furo", marker = "extra == 'docs'", specifier = ">=2025.9.25" },
+    { name = "sphinx", marker = "extra == 'docs'", specifier = ">=8.2.3" },
+]
+provides-extras = ["s3", "docs"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -599,10 +603,6 @@ dev = [
     { name = "pytest-aioboto3", specifier = ">=0.6.0" },
     { name = "pytest-asyncio", specifier = ">=1.2.0" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
-]
-docs = [
-    { name = "furo", specifier = ">=2025.9.25" },
-    { name = "sphinx", specifier = ">=8.2.3" },
 ]
 
 [[package]]

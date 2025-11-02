@@ -1,12 +1,10 @@
 Usage
 =====
-
 This section provides practical examples and guidance on using ``fastapi-async-storages``
 to handle asynchronous file storage in your FastAPI applications.
 
 Working with storages
 ---------------------
-
 Often in projects, you want to get input file in the API and store it somewhere.
 The `fastapi-async-storages` simplifies the process to store and retrieve the files in a re-usable manner.
 
@@ -56,7 +54,6 @@ Now let's see a minimal example of using :class:`~async_storages.S3Storage` in a
 
 Working with ORM extensions
 ---------------------------
-
 The example you saw was useful, but **fastapi-async-storages** has ORM integrations
 which makes storing and serving the files easier.
 
@@ -67,7 +64,6 @@ Support ORM include:
 
 SQLAlchemy
 ~~~~~~~~~~
-
 You can use custom :code:`SQLAlchemy` types from :code:`fastapi-async-storages` for this.
 
 Supported types include:
@@ -101,32 +97,71 @@ Let's see an example:
   )
 
   class Document(Base):
-  __tablename__ = "documents"
+    __tablename__ = "documents"
 
-  id = Column(Integer, primary_key=True)
-  file = Column(FileType(storage=storage))
-  image = Column(ImageType(storage=storage))
+    id = Column(Integer, primary_key=True)
+    file = Column(FileType(storage=storage))
+    image = Column(ImageType(storage=storage))
 
   async def main():
     async with engine.begin() as conn:
       await conn.run_sync(Base.metadata.create_all)
 
-  # create an in-memory image
-  img_buf = BytesIO()
-  Image.new("RGB", (32, 16), color=(255, 0, 0)).save(img_buf, format="PNG")
-  img_buf.seek(0)
+    # create an in-memory image
+    img_buf = BytesIO()
+    Image.new("RGB", (32, 16), color=(255, 0, 0)).save(img_buf, format="PNG")
+    img_buf.seek(0)
 
-  # upload and link file and image
-  img_name await storage.upload(img_buf, "uploads/test-image.png")
-  file_name = await storage.upload(BytesIO(b"hello world"), "uploads/test.txt")
+    # upload and link file and image
+    img_name await storage.upload(img_buf, "uploads/test-image.png")
+    file_name = await storage.upload(BytesIO(b"hello world"), "uploads/test.txt")
 
-  async with async_session() as session:
-    doc = Document(file=file_name, image=img_name)
-    session.add(doc)
-    await session.commit()
+    async with async_session() as session:
+      doc = Document(file=file_name, image=img_name)
+      session.add(doc)
+      await session.commit()
 
-    doc = await session.get(Document, doc.id)
-    url = await doc.file.get_path()
-    print(url)
-    width, height = await doc.image.get_dimensions()
-    print(f"Dimensions: {width}x{height}")
+      doc = await session.get(Document, doc.id)
+      url = await doc.file.get_path()
+      print(url)
+      width, height = await doc.image.get_dimensions()
+      print(f"Dimensions: {width}x{height}")
+
+Integration with `Alembic <https://alembic.sqlalchemy.org/en/latest/>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+By default, custom types are not registered in Alembic's migrations.
+To integrate these new types with Alembic, you can do this:
+
+We create the following snippet in ``custom_types.py``:
+
+.. code-block:: python
+
+  from typing import Any
+  from async_storages.integrations.sqlalchemy import FileType as _FileType
+
+  from app.core.storages import storage
+
+  class FileType(_FileType):
+    def __init__(self, *args: Any, **kwargs: Any):
+      super().__init__(storage=storage, *args, **kwargs)
+
+And by using the new :class:`~async_storages.integrations.sqlalchemy.FileType` Alembic can do the imports properly.
+
+Add files path to ``script.py.mako``.
+Alembic allows you to modify ``script.py.mako`` and the migrations are generated with proper imports.
+
+.. code-block:: mako
+
+  """${message}
+
+  Revision ID: ${up_revision}
+  Revises: ${down_revision | comma,n}
+  Create Date: ${create_date}
+
+  """
+  from alembic import op
+  import sqlalchemy as sa
+  import path_to_custom_types_py_file
+  ${imports if imports else ""}
+
+  # THE REST OF SCRIPT
