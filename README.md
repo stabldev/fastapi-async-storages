@@ -1,5 +1,11 @@
 # fastapi-async-storages
 
+![GitHub branch check runs](https://img.shields.io/github/check-runs/stabldev/fastapi-async-storages/main?style=flat-square)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/stabldev/fastapi-async-storages/release.yml?style=flat-square)
+![Read the Docs](https://img.shields.io/readthedocs/fastapi-async-storages?style=flat-square)
+![PyPI - Version](https://img.shields.io/pypi/v/fastapi-async-storages?style=flat-square)
+![PyPI - Implementation](https://img.shields.io/pypi/implementation/fastapi-async-storages?style=flat-square)
+
 A powerful, extensible, and async-ready cloud object storage backend for FastAPI.
 
 > Drop-in, plug-and-play cloud storage for your FastAPI apps; with full async support.\
