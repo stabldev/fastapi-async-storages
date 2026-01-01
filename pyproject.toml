@@ -3,11 +3,33 @@ name = "fastapi-async-storages"
 version = "0.1.1"
 description = "A powerful, extensible, and async-ready cloud object storage backend for FastAPI."
 readme = "README.md"
-authors = [
-    { name = "stabldev", email = "thestabldev@gmail.com" }
-]
+license = { text = "MIT" }
+authors = [{ name = "stabldev", email = "thestabldev@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/stabldev/fastapi-async-storages"
+Repository = "https://github.com/stabldev/fastapi-async-storages"
+Documentation = "https://fastapi-async-storages.readthedocs.io"
+Changelog = "https://github.com/stabldev/fastapi-async-storages/releases"
+
+[project.classifiers] = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Framework :: FastAPI",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Utilities",
+  "Typing :: Typed"
+]
 
 [project.optional-dependencies]
 s3 = ["aioboto3>=15.4.0"]
