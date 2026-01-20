@@ -1,7 +1,6 @@
-# pyright: reportPrivateLocalImportUsage=none
 from io import BytesIO
 import mimetypes
-from pathlib import Path
+from pathlib import PurePosixPath
 from typing import Any, BinaryIO, override
 
 from async_storages.base import BaseStorage
@@ -97,15 +96,14 @@ class S3Storage(BaseStorage):
         :return: Sanitized file path.
         :rtype: str
         """
-        parts = Path(name).parts
-        safe_parts: list[str] = []
+        parts = PurePosixPath(name).parts
+        safe_parts = [
+            secure_filename(part) for part in parts if part not in ("..", ".", "")
+        ]
 
-        for part in parts:
-            if part not in ("..", ".", ""):
-                safe_parts.append(secure_filename(part))
-
-        safe_path = Path(*safe_parts)
-        return str(safe_path)
+        if not safe_parts:
+            raise ValueError("Invalid object key")
+        return str(PurePosixPath(*safe_parts))
 
     @override
     async def get_size(self, name: str) -> int:
