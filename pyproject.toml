@@ -1,6 +1,6 @@
 [project]
 name = "fastapi-async-storages"
-version = "0.1.2"
+version = "0.1.3"
 description = "A powerful, extensible, and async-ready cloud object storage backend for FastAPI."
 readme = "README.md"
 license = { text = "MIT" }
