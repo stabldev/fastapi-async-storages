@@ -22,14 +22,23 @@ class S3Storage(BaseStorage):
     This class provides async methods for uploading, retrieving, and deleting files
     in an S3 bucket using the ``aioboto3`` client.
 
+    Credentials can be provided explicitly via ``aws_access_key_id`` and
+    ``aws_secret_access_key`` (useful in development with MinIO or similar),
+    or omitted to let ``aioboto3`` resolve them automatically through the
+    standard AWS credential chain (environment variables, IAM roles, instance
+    metadata, etc.).
+
     :param bucket_name: Name of the S3 bucket.
     :type bucket_name: str
-    :param endpoint_url: The S3 endpoint hostname (without protocol).
-    :type endpoint_url: str
-    :param aws_access_key_id: AWS access key ID for authentication.
-    :type aws_access_key_id: str
+    :param endpoint_url: The S3 endpoint hostname (without protocol). Optional;
+        when omitted the SDK uses the default AWS S3 endpoint for the region.
+    :type endpoint_url: str or None
+    :param aws_access_key_id: AWS access key ID for authentication. Optional;
+        when omitted, credentials are resolved via the AWS credential chain.
+    :type aws_access_key_id: str or None
     :param aws_secret_access_key: AWS secret access key for authentication.
-    :type aws_secret_access_key: str
+        Optional; when omitted, credentials are resolved via the AWS credential chain.
+    :type aws_secret_access_key: str or None
     :param region_name: AWS region name (optional).
     :type region_name: str or None
     :param use_ssl: Whether to use HTTPS (True) or HTTP (False).
@@ -46,23 +55,26 @@ class S3Storage(BaseStorage):
     def __init__(
         self,
         bucket_name: str,
-        endpoint_url: str,
-        aws_access_key_id: str,
-        aws_secret_access_key: str,
+        endpoint_url: str | None = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
         region_name: str | None = None,
         use_ssl: bool = True,
         default_acl: str | None = None,
         custom_domain: str | None = None,
         querystring_auth: bool = False,
     ) -> None:
-        assert not endpoint_url.startswith("http"), (
-            "Endpoint should not contain protocol"
-        )
+        if endpoint_url is not None:
+            assert not endpoint_url.startswith("http"), (
+                "Endpoint should not contain protocol"
+            )
 
         self.bucket_name: str = bucket_name
-        self.endpoint_url: str = endpoint_url.rstrip("/")
-        self.aws_access_key_id: str = aws_access_key_id
-        self.aws_secret_access_key: str = aws_secret_access_key
+        self.endpoint_url: str | None = (
+            endpoint_url.rstrip("/") if endpoint_url else None
+        )
+        self.aws_access_key_id: str | None = aws_access_key_id
+        self.aws_secret_access_key: str | None = aws_secret_access_key
         self.region_name: str | None = region_name
         self.use_ssl: bool = use_ssl
         self.default_acl: str | None = default_acl
@@ -70,18 +82,24 @@ class S3Storage(BaseStorage):
         self.querystring_auth: bool = querystring_auth
 
         self._http_scheme: str = "https" if self.use_ssl else "http"
-        self._url: str = f"{self._http_scheme}://{self.endpoint_url}"
+        self._url: str | None = (
+            f"{self._http_scheme}://{self.endpoint_url}" if self.endpoint_url else None
+        )
         self._session: "aioboto3.Session" = aioboto3.Session()
 
     def _get_s3_client(self) -> Any:
-        return self._session.client(
-            "s3",
-            region_name=self.region_name,
-            use_ssl=self.use_ssl,
-            endpoint_url=self._url,
-            aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key,
-        )
+        kwargs: dict[str, Any] = {
+            "region_name": self.region_name,
+            "use_ssl": self.use_ssl,
+        }
+
+        if self._url is not None:
+            kwargs["endpoint_url"] = self._url
+        if self.aws_access_key_id is not None:
+            kwargs["aws_access_key_id"] = self.aws_access_key_id
+        if self.aws_secret_access_key is not None:
+            kwargs["aws_secret_access_key"] = self.aws_secret_access_key
+        return self._session.client("s3", **kwargs)
 
     @override
     def get_name(self, name: str) -> str:
@@ -152,7 +170,13 @@ class S3Storage(BaseStorage):
                     "get_object", Params=params
                 )
         else:
-            url = f"{self._http_scheme}://{self.endpoint_url}/{self.bucket_name}/{name}"
+            if self.endpoint_url:
+                url = f"{self._http_scheme}://{self.endpoint_url}/{self.bucket_name}/{name}"
+            else:
+                # Default S3 URL format when no custom endpoint is provided
+                url = (
+                    f"{self._http_scheme}://{self.bucket_name}.s3.amazonaws.com/{name}"
+                )
             return url
 
     @override
