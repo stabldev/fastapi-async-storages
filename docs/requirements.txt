@@ -10,7 +10,7 @@ beautifulsoup4==4.14.3
     # via furo
 certifi==2026.1.4
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
     # via requests
 docutils==0.22.4
     # via sphinx
