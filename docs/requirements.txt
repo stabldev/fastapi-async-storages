@@ -18,7 +18,7 @@ furo==2025.12.19
     # via fastapi-async-storages (pyproject.toml:docs)
 idna==3.11
     # via requests
-imagesize==1.4.1
+imagesize==2.0.0
     # via sphinx
 jinja2==3.1.6
     # via sphinx
